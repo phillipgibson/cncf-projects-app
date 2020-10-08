@@ -4,9 +4,9 @@
 # Uncomment out the sections below to take full advantage of what Porter can do!
 
 name: cncf-projects-app
-version: 0.1.3
+version: 0.1.0
 description: "A bundle that installs and removes the CNCF demo project. Use \'porter explain --tag <registry>/<organization>/<repository>/<image name>:version\' to display required and optional parameters, credentials, and outputs."
-tag: ghcr.io/squillace/cncf-projects-app/cncf
+tag: ghcr.io/squillace/cncf-projects-app/cncf:v0.1.0
 
 # Moves mixins up to the top for faster bundle dev iteration
 dockerfile: Dockerfile.tmpl
@@ -15,78 +15,36 @@ mixins:
   - exec
   - kubernetes
   - helm3:
-      #NOTE: the recently secured version of Helm 3 detects and fails the jetstack 
-      # helm chart out due to an invalid yaml key "serverInfo"
-      clientVersion: v3.3.3
-      repositories:
-        # Add the official stable repository
-        stable:
-          url: "https://kubernetes-charts.storage.googleapis.com"
-        # Install nginx ingress for Harbor
-        ingress-nginx:
-          url: "https://kubernetes.github.io/ingress-nginx"
-        # Add the Jetstack Helm repository
-        jetstack:
-          url: "https://charts.jetstack.io"
-        # Add the harbor helm repo 
-        harbor:
-          url: "https://helm.goharbor.io"
-        # Add the OpenFaas helm repo
-        openfaas:
-          url: "https://openfaas.github.io/faas-netes/"
-        # Add the Jaeger helm repo
-        jaegertracing:
-          url: "https://jaegertracing.github.io/helm-charts"
+      clientVersion: v3.3.2
+
 
 install:
   - exec:
       command: bash
       description: "Creating the ingress namespace."
       flags:
-          c: '"kubectl create namespace {{bundle.parameters.ingress-namespace}}"' 
-
-  - exec:
-        command: bash
-        description: "Installing the nginx ingress...."
-        arguments:
-            - "nginx-ingress.sh"
-            - "{{bundle.parameters.ingress-namespace}}"
-
-#  - helm3:
-#      description: "Use Helm to deploy an NGINX ingress controller."
-#      name: nginx-ingress # parameterize
-#      chart: stable/nginx-ingress
+          c: '"kubectl create namespace ingress-basic"'   
+  - helm3:
+      description: "Adding the \'stable\' Helm chart repository."  
+      repositories:
+        stable:
+          url: "https://kubernetes-charts.storage.googleapis.com"
+  - helm3:
+      description: "Use Helm to deploy an NGINX ingress controller."
+      name: nginx-ingress
+      chart: stable/nginx-ingress
   #      version: CHART_VERSION
-#      namespace: "{{bundle.parameters.ingress-namespace}}"
-#      replace: true
-#      wait: true # default true
-#      set:
-#        controller.replicaCount: 2
-#        controller.nodeSelector.'beta.kubernetes.io/os': linux      
-#        defaultBackend.nodeSelector.'beta.kubernetes.io/os': linux
-#      debug:  
+      namespace: ingress-basic
+      replace: true
+      wait: true # default true
+      set:
+        controller.replicaCount: 2
+        controller.nodeSelector.beta.kubernetes.io/os: linux      
+        defaultBackend.nodeSelector.beta.kubernetes.io/os: linux
+ 
 
-  - kubernetes:
-        description: "Installing Rook."
-        manifests:
-            - "yml/rook-common.yaml"
-            - "yml/rook-operator.yaml"
-            - "yml/rook-cluster.yaml"
-            - "yml/rook-storageclass.yaml"
-        validate: true
-        wait: true
-  - exec:
-      command: bash
-      description: "Creating the ingress namespace."
-      flags:
-          c: '"kubectl create namespace {{bundle.parameters.harbor-ingress-namespace}}"' 
 
-  - exec:
-        command: bash
-        description: "Installing the nginx ingress...."
-        arguments:
-            - "harbor-system-ingress.sh"
-            - "{{bundle.parameters.harbor-ingress-namespace}}"
+
 upgrade:
   - exec:
       description: "TODO: understand what upgrade of this might mean."
@@ -95,47 +53,11 @@ upgrade:
         - upgrade
 
 uninstall:
-
-  - helm3:
-      description: "Deleting the basic ingress Helm chart resources."
-      namespace: "{{bundle.parameters.harbor-ingress-namespace}}"
-      releases:
-        - "harbor-nginx-ingress" # parameterize?
-
   - exec:
-      description: "delete "
-      command: kubectl
+      description: "Uninstall Hello World"
+      command: ./helpers.sh
       arguments:
-        - delete
-        - namespace
-        - "{{bundle.parameters.harbor-ingress-namespace}}"
-
-  - kubernetes:
-        description: "Uninstalling Rook...."
-        manifests:
-            - "yml/rook-storageclass.yaml"
-            - "yml/rook-cluster.yaml"
-            - "yml/rook-operator.yaml"
-#            - "yml/rook-common.yaml"
-
-        wait: true
-
-
-
-
-  - helm3:
-      description: "Deleting the basic ingress Helm chart resources."
-      namespace: "{{bundle.parameters.ingress-namespace}}"
-      releases:
-        - "nginx-ingress" # parameterize?
-
-  - exec:
-      description: "delete "
-      command: kubectl
-      arguments:
-        - delete
-        - namespace
-        - "{{bundle.parameters.ingress-namespace}}"
+        - uninstall
 
 # Below is an example of how to define credentials
 # See https://porter.sh/author-bundles/#credentials
@@ -143,16 +65,12 @@ credentials:
   - name: kubeconfig
     type: file
     path: /root/.kube/config
-
-
+#  - name: username
+#    env: USERNAME
 
 # Below is an example of how to define parameters
 # See https://porter.sh/author-bundles/#parameters
-parameters:
-  - name: ingress-namespace
-    type: string
-    default: ingress-basic
-  - name: harbor-ingress-namespace
-    type: string
-    default: harbor-ingress-system
-
+#parameters:
+#  - name: mysql_user
+#    type: string
+#    default: wordpress
