@@ -2,3 +2,8 @@
 # Put files here that you don't want copied into your bundle's invocation image
 .gitignore
 Dockerfile.tmpl
+
+vitess/**
+
+!vitess/examples/operator/operator.yaml
+!vitess/examples/operator/101_initial_cluster.yaml
