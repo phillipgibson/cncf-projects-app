@@ -480,5 +480,5 @@ sed -i "s/{mygithub-repo-replace}/$gitHubRepo/g" yml/app-webhook-run.yaml
 kubectl apply -f yml/app-webhook-run.yaml -n conexp-mvp-devops
 ```
 ## Launch the Application
-Navigate to the FQDN of the NGINX ingress controller  For ex. uniquename.centralus.cloudapp.azure.com.
+Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example uniquename.centralus.cloudapp.azure.com.
 This will launch the application and you can proceed to create, update, delete expenses.
