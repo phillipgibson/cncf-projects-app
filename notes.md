@@ -161,7 +161,11 @@ kubectl edit statefulset harbor-harbor-database  -n harbor-system
 Update the command on *initContainers* to
 
 ```
+Please Note, below command is for an older version of Harbor and deprecated, please DO NOT use.
 chown -R postgres:postgres /var/lib/postgresql/data; chmod 700 -R /var/lib/postgresql/data
+
+Please use the following:
+chown -R postgres:postgres /var/lib/postgresql/data/pgdata && chmod 700 -R /var/lib/postgresql/data/pgdata
 ```
 
 ```
