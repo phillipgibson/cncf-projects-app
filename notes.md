@@ -188,15 +188,22 @@ admin
 ## MySQL Installation
 
 Deploy Mysql
+
 ```
-kubectl create ns mysql
-helm install mysql stable/mysql  --set mysqlRootPassword=FTA@CNCF0n@zure3,mysqlUser=ftacncf,mysqlPassword=FTA@CNCF0n@zure3,mysqlDatabase=conexp-mysql,persistence.storageClass=rook-ceph-block -n mysql
+#Deploy Vitess
+kubectl create ns vitess-system
+kubectl apply -f yml/vitess_operator.yaml -n vitess-system
+kubectl apply -f yml/vitess_cluster.yaml -n vitess-system
+
+#vgate host is random so create known service
+kubectl apply -f yml/mysql-host-service.yaml -n vitess-system
 ```
+
 Create the databases 
-```
-kubectl run -n mysql -i --tty ubuntu --image=ubuntu:16.04 --restart=Never -- bash -il
+```bash
+kubectl run -n vitess-system -i ubuntu --image=ubuntu:18.04 --restart=Never -- bash -il
 apt-get update && apt-get install mysql-client -y
-mysql -h mysql -p
+mysql -h mysql.vitess-system.svc.cluster.local -u ftacncf -p
 show databases;
 
 CREATE DATABASE conexpweb;
