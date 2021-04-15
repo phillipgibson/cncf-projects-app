@@ -16,6 +16,7 @@ kubectl create namespace ingress-basic
 
 # Add the ingress-nginx repository
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
 
 # Use Helm to deploy an NGINX ingress controller
 helm install nginx-ingress ingress-nginx/ingress-nginx \
@@ -52,11 +53,9 @@ Install Ingress for Harbor.
 # Create namespace for the harbor nginx ingress controller 
 kubectl create namespace harbor-ingress-system
 
-# Add the nginx helm repo
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-
 # Install nginx ingress for Harbor
 helm install harbor-nginx-ingress ingress-nginx/ingress-nginx \
+    --version 3.23.0 \
     --namespace harbor-ingress-system \
     --set controller.ingressClass=harbor-nginx \
     --set controller.replicaCount=2 \
@@ -74,18 +73,15 @@ kubectl label namespace ingress-basic cert-manager.io/disable-validation=true
 
 # Add the Jetstack Helm repository
 helm repo add jetstack https://charts.jetstack.io
-
-# Update your local Helm chart repository cache
 helm repo update
 
 # Install the cert-manager Helm chart
-helm install \
-  cert-manager \
+helm install cert-manager jetstack/cert-manager\
   --namespace ingress-basic \
   --version v0.16.1 \
   --set installCRDs=true \
-  --set nodeSelector."beta\.kubernetes\.io/os"=linux \
-  jetstack/cert-manager
+  --set nodeSelector."beta\.kubernetes\.io/os"=linux
+  
 ```
 
 Create the ClusterIssuer by applying the below YAML with the email address changed
@@ -134,6 +130,7 @@ externalUrl=https://$registryHost
 kubectl create namespace harbor-system
 # Add the harbor helm repo 
 helm repo add harbor https://helm.goharbor.io
+helm repo update
 
 # Install Harbor
 helm install harbor harbor/harbor \
@@ -151,7 +148,8 @@ helm install harbor harbor/harbor \
 	--set persistence.persistentVolumeClaim.registry.storageClass=rook-ceph-block \
 	--set persistence.persistentVolumeClaim.chartmuseum.storageClass=rook-ceph-block \
 	--set persistence.persistentVolumeClaim.jobservice.storageClass=rook-ceph-block \
-	--set persistence.persistentVolumeClaim.database.storageClass=rook-ceph-block
+	--set persistence.persistentVolumeClaim.database.storageClass=rook-ceph-block \
+	--set persistence.persistentVolumeClaim.redis.storageClass=rook-ceph-block 
 
 ```
 Patch the database stateful for the Harbor database so it will not error on pod restarts
