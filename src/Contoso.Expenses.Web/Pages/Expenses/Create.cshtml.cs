@@ -21,11 +21,11 @@ namespace Contoso.Expenses.Web.Pages.Expenses
         private readonly ContosoExpensesWebContext _context;
         private string costCenterAPIUrl;
         private readonly QueueInfo _queueInfo;
-        private readonly IHostingEnvironment _env;
+        private readonly IWebHostEnvironment _env;
         private readonly IMetrics _metrics;
 
         public CreateModel(ContosoExpensesWebContext context, IOptions<ConfigValues> config, QueueInfo queueInfo,
-                            IHostingEnvironment env, IMetrics metrics)
+                            IWebHostEnvironment env, IMetrics metrics)
         {
             _metrics = metrics;
             _context = context;
