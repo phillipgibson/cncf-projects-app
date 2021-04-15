@@ -52,7 +52,7 @@ spec:
         shardTemplate:
           databaseInitScriptSecret:
             name: cluster-config
-            key: init_db.sql
+            key: init_api_db.sql
           replication:
             enforceSemiSync: false
           tabletPools:
@@ -85,7 +85,7 @@ spec:
         shardTemplate:
           databaseInitScriptSecret:
             name: cluster-config
-            key: init_db.sql
+            key: init_web_db.sql
           replication:
             enforceSemiSync: false
           tabletPools:
@@ -135,7 +135,22 @@ stringData:
         "Password": "FTA@CNCF0n@zure3"
       }]
     }
-  init_db.sql: |
+  init_api_db.sql: |
+  
+    CREATE TABLE IF NOT EXISTS conexpapi.CostCenters(
+       CostCenterId int(11)  NOT NULL,
+       SubmitterEmail text NOT NULL,
+       ApproverEmail text NOT NULL,
+       CostCenterName text NOT NULL,
+       PRIMARY KEY ( CostCenterId )
+    );
+
+    INSERT INTO conexpapi.CostCenters (CostCenterId, SubmitterEmail,ApproverEmail,CostCenterName)  values (1, 'user1@mycompany.com', 'user1@mycompany.com','123E42');
+    INSERT INTO conexpapi.CostCenters (CostCenterId, SubmitterEmail,ApproverEmail,CostCenterName)  values (2, 'user2@mycompany.com', 'user2@mycompany.com','456C14');
+    INSERT INTO conexpapi.CostCenters (CostCenterId, SubmitterEmail,ApproverEmail,CostCenterName)  values (3, 'user3@mycompany.com', 'user3@mycompany.com','456C14');
+
+    GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
+  init_web_db.sql: |
     # This file is executed immediately after mysql_install_db,
     # to initialize a fresh data directory.
 
@@ -154,6 +169,8 @@ stringData:
 
     # Remove test database.
     DROP DATABASE IF EXISTS test;
+    
+    GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
 
     ###############################################################################
     # Vitess defaults
