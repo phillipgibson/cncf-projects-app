@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    planetscale.com/cluster: vitess-mysql
+    planetscale.com/component: vtgate
+  name: mysql
+spec:
+  ports:
+  - name: web
+    port: 15000
+    protocol: TCP
+    targetPort: web
+  - name: grpc
+    port: 15999
+    protocol: TCP
+    targetPort: grpc
+  - name: mysql
+    port: 3306
+    protocol: TCP
+    targetPort: mysql
+  selector:
+    planetscale.com/cluster: vitess-mysql
+    planetscale.com/component: vtgate
+  sessionAffinity: None
+  type: ClusterIP
