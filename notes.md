@@ -19,6 +19,7 @@ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 
 # Use Helm to deploy an NGINX ingress controller
 helm install nginx-ingress ingress-nginx/ingress-nginx \
+    --version 3.23.0 \
     --namespace ingress-basic \
     --set controller.replicaCount=2 \
     --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
@@ -137,10 +138,11 @@ helm repo add harbor https://helm.goharbor.io
 # Install Harbor
 helm install harbor harbor/harbor \
 	--namespace harbor-system \
+	--version 1.6.0 \
 	--set expose.ingress.hosts.core=$registryHost \
-  --set expose.tls.secretName=ingress-cert-harbor \
+	--set expose.tls.secretName=ingress-cert-harbor \
 	--set notary.enabled=false \
-  --set trivy.enabled=false \
+	--set trivy.enabled=false \
 	--set expose.ingress.annotations."kubernetes\.io/ingress\.class"=harbor-nginx \
 	--set expose.ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt  \
 	--set persistence.enabled=true \
@@ -149,31 +151,41 @@ helm install harbor harbor/harbor \
 	--set persistence.persistentVolumeClaim.registry.storageClass=rook-ceph-block \
 	--set persistence.persistentVolumeClaim.chartmuseum.storageClass=rook-ceph-block \
 	--set persistence.persistentVolumeClaim.jobservice.storageClass=rook-ceph-block \
-	--set persistence.persistentVolumeClaim.database.storageClass=rook-ceph-block \
-	--set persistence.persistentVolumeClaim.redis.storageClass=rook-ceph-block 
+	--set persistence.persistentVolumeClaim.database.storageClass=rook-ceph-block
 
 ```
-Update the stateful set permission for the Harbor database so that it will not error on pod restarts
+Patch the database stateful for the Harbor database so it will not error on pod restarts
 ```
-kubectl edit statefulset harbor-harbor-database  -n harbor-system
+kubectl patch statefulset harbor-harbor-database -n harbor-system --patch "$(cat yml/harbor-init-patch.yaml)"
 ```
+Confirm harber installed and running then create the harbor project and user
+```bash
+#Create conexp project in Harbor
+ curl -u admin:admin -i -k -X POST "$externalUrl/api/v2.0/projects" \
+      -d "@json/harbor-project.json" \
+      -H "Content-Type: application/json"
 
-Update the command on *initContainers* to
+#Create conexp user in Harbor
+ curl -u admin:admin -i -k -X POST "$externalUrl/api/v2.0/users" \
+      -d "@json/harbor-project-user.json" \
+      -H "Content-Type: application/json"
 
-```
-Please Note, below command is for an older version of Harbor and deprecated, please DO NOT use.
-chown -R postgres:postgres /var/lib/postgresql/data; chmod 700 -R /var/lib/postgresql/data
+#Add the conexp user to the conexp project in Harbor
 
-Please use the following:
-chown -R postgres:postgres /var/lib/postgresql/data/pgdata && chmod 700 -R /var/lib/postgresql/data/pgdata
-```
+conexpid=$(curl -u admin:admin -k -s -X GET "$externalUrl/api/v2.0/projects?name=conexp" | jq '.[0].project_id')
+echo "project_id: $conexpid"
 
+ curl -u admin:admin -i -k -X POST "$externalUrl/api/v2.0/projects/$conexpid/members" \
+      -d "@json/harbor-project-member.json" \
+      -H "Content-Type: application/json"
 ```
-Now retrieve the Harbor Registry URL: echo $externalUrl
-And use the following credentials:
+Now retrieve the Harbor Registry URL:
+```bash 
+echo $externalUrl
+```
+Use the following credentials to login:\
+admin\
 admin
-admin
-```
 
 ## MySQL Installation
 
@@ -268,14 +280,17 @@ kubectl apply -f yml/openfaas-nats-connector.yaml
 
 ```
 kubectl create ns monitoring
-helm repo add stable https://kubernetes-charts.storage.googleapis.com
-helm install prometheus stable/prometheus-operator -f yml/prometheus-values.yaml -n monitoring
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus prometheus-community/kube-prometheus-stack -f yml/prometheus-values.yaml  \
+  -n monitoring \
+  --version 13.13.0
 ```
 ```
 kubectl port-forward deploy/prometheus-grafana 8080:3000 -n monitoring
 Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
 
-kubectl port-forward svc/prometheus-prometheus-oper-prometheus 9090:9090 -n monitoring
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring 
 Browse to http://localhost:9090
 ```
 
@@ -286,7 +301,9 @@ helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
 helm repo update
 
 kubectl create ns tracing
-helm install jaeger jaegertracing/jaeger -f yml/jaeger-values.yaml -n tracing
+helm install jaeger jaegertracing/jaeger -f yml/jaeger-values.yaml \
+  -n tracing \
+  --version 0.40.1
 ```
 ```
 # Wait for at least ~5 minutes before browsing to the Jaeger UI
@@ -315,14 +332,14 @@ step certificate create identity.linkerd.cluster.local issuer.crt issuer.key --c
 linkerd install --identity-trust-anchors-file ca.crt --identity-issuer-certificate-file issuer.crt --identity-issuer-key-file issuer.key | kubectl apply -f -
 ```
 
-Integrate Openfaas with Linkerd
+Integrate Openfaas with Linkerd (need to wait for Linker do to come up)
 ```
 kubectl -n openfaas get deploy gateway -o yaml | linkerd inject --skip-outbound-ports=4222 - | kubectl apply -f -
 ```
 
 Integrate Nginx Ingress controller with Linkerd
 ```
-kubectl get deploy/nginx-ingress-controller -n ingress-basic -o yaml | linkerd inject - | kubectl apply -f - 
+kubectl get deploy/nginx-ingress-ingress-nginx--controller -n ingress-basic -o yaml | linkerd inject - | kubectl apply -f - 
 ```
 
 Linkerd metrics integration with Prometheus
@@ -360,7 +377,7 @@ Browse to http://localhost:8080
 ## Tekton
 Install Tekton pipelines
 ```
-kubectl apply -f https://storage.googleapis.com/tekton-releases/latest/release.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.21.0/release.yaml
 
 kubectl apply -f yml/tekton-default-configmap.yaml  -n  tekton-pipelines
 kubectl apply -f yml/tekton-pvc-configmap.yaml -n  tekton-pipelines
@@ -368,11 +385,11 @@ kubectl apply -f yml/tekton-feature-flags-configmap.yaml -n  tekton-pipelines
 ```
 Install Tekton Triggers
 ```
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/pipeline/previous/v0.21.0/release.yaml
 ```
 Install Tekton Dashboard
 ```
-kubectl apply --filename https://github.com/tektoncd/dashboard/releases/download/v0.5.2/tekton-dashboard-release.yaml
+kubectl apply --filename https://github.com/tektoncd/dashboard/releases/download/v0.14.0/tekton-dashboard-release.yaml
 ```
 ```
 kubectl port-forward svc/tekton-dashboard 8080:9097  -n tekton-pipelines
@@ -381,32 +398,23 @@ Browse to http://localhost:8080
 
 ## App Installation
 
-Create the Project and User in Harbor
-- Login to Harbor
-- Add a new Project with name conexp
-- Add a new User under Administration with username as conexp and password as FTA@CNCF0n@zure3
-- Associate the user with the conexp project under Memebers tab with a Developer role
-
 Build and push the containers
 ```
 docker login $registryHost
 conexp
 FTA@CNCF0n@zure3
 
-cd src/Contoso.Expenses.API
-docker build -t $registryHost/conexp/api:latest .
-# Go to Harbor registry and create **conexp** project
+#Build and push API service
+docker build -t $registryHost/conexp/api:latest src/Contoso.Expenses.API
 docker push $registryHost/conexp/api:latest
 
-cd ..
-docker build -t $registryHost/conexp/web:latest -f Contoso.Expenses.Web/Dockerfile .
+#Build and push web app
+docker build -t $registryHost/conexp/web:latest  -f src/Contoso.Expenses.Web/Dockerfile ./src
 docker push $registryHost/conexp/web:latest
 
-docker build -t $registryHost/conexp/emaildispatcher:latest -f Contoso.Expenses.OpenFaaS/Dockerfile .
+#Build and push email dispatcher
+docker build -t $registryHost/conexp/emaildispatcher:latest  -f src/Contoso.Expenses.OpenFaaS/Dockerfile ./src
 docker push $registryHost/conexp/emaildispatcher:latest
-
-cd ..
-
 ```
 
 ```
