@@ -91,7 +91,7 @@ namespace Contoso.Expenses.Web
                 app.UseExceptionHandler("/Error");
             }
 
-            context.Database.Migrate();
+            context.Database.EnsureCreated();
 
             //app.UseDefaultFiles();
             //app.UseStaticFiles();
