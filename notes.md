@@ -363,7 +363,7 @@ kubectl apply -f yml/tekton-feature-flags-configmap.yaml -n  tekton-pipelines
 ```
 Install Tekton Triggers
 ```
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/pipeline/previous/v0.21.0/release.yaml
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/previous/v0.12.0/release.yaml
 ```
 Install Tekton Dashboard
 ```
