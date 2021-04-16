@@ -190,20 +190,25 @@ admin
 Deploy Mysql
 
 ```
-#Deploy Vitess
-kubectl create ns vitess-system
-kubectl apply -f yml/vitess_operator.yaml -n vitess-system
-kubectl apply -f yml/vitess_cluster.yaml -n vitess-system
+kubectl create ns mysql
 
-#vgate host is random so create known service
-kubectl apply -f yml/mysql-host-service.yaml -n vitess-system
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+
+helm install mysql bitnami/mysql \
+	--namespace mysql \
+	--version 8.5.1 \
+	--set auth.rootPassword=FTA@CNCF0n@zure3 \
+	--set auth.username=ftacncf  \
+	--set auth.password=FTA@CNCF0n@zure3 \
+	--set global.storageClass=rook-ceph-block 
 ```
 
 Create the databases 
 ```bash
-kubectl run -n vitess-system -i ubuntu --image=ubuntu:18.04 --restart=Never -- bash -il
+kubectl run -n mysql -i -t ubuntu --image=ubuntu:18.04 --restart=Never -- bash -il
 apt-get update && apt-get install mysql-client -y
-mysql -h mysql.vitess-system.svc.cluster.local -u ftacncf -p
+mysql -h mysql -p
 show databases;
 
 CREATE DATABASE conexpweb;
@@ -228,34 +233,6 @@ GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
 
 USE conexpweb;
 GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
-```
-
-## Vitess Installation (Note: Either do the SQL Installation as above or Vitess, not both)
-
-Clone the Vitess Git repo
-```
-sudo git clone https://github.com/vitessio/vitess.git 
-```
-Navigate to the following folder:
-```
-~/Vitess/vitess/examples/operator
-```
-Run the following kubectl commands:
-```
-kubectl apply -f operator.yaml 
-
-kubectl apply -f 101_initial_cluster.yaml
-```
-Get the POD running the Vitess (from the pf.sh file):
-```
-kubectl get deployment --selector="planetscale.com/component=vtgate"
-```
-Expose the deploy as a svc, get the service YAML, and edit it/clean it
-To Do: Add the example YAML file.
-
-Install MySQL Client Locally
-```
-apt install mysql-client
 ```
 
 ## OpenFaaS
