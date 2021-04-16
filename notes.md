@@ -321,7 +321,7 @@ kubectl -n openfaas get deploy gateway -o yaml | linkerd inject --skip-outbound-
 
 Integrate Nginx Ingress controller with Linkerd
 ```
-kubectl get deploy/nginx-ingress-ingress-nginx--controller -n ingress-basic -o yaml | linkerd inject - | kubectl apply -f - 
+kubectl get deploy/nginx-ingress-ingress-nginx-controller -n ingress-basic -o yaml | linkerd inject - | kubectl apply -f - 
 ```
 
 Linkerd metrics integration with Prometheus
