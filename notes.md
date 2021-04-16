@@ -326,20 +326,10 @@ kubectl get deploy/nginx-ingress-ingress-nginx-controller -n ingress-basic -o ya
 
 Linkerd metrics integration with Prometheus
 ```
-kubectl create secret generic additional-scrape-configs --from-file=yml/linkerd-prometheus-additional.yaml -n monitoring
-kubectl edit prometheus  prometheus-prometheus-oper-prometheus  -n monitoring
+kubectl create secret generic prometheus-kube-prometheus-prometheus-scrape-confg-linkerd --from-file=additional-scrape-configs.yaml=yml/linkerd-prometheus-additional.yaml -n monitoring
 
-Add the additionalScrapeConfigs as below
-  ....
-  ....
-  serviceMonitorSelector:
-    matchLabels:
-      team: frontend
-  additionalScrapeConfigs:
-    name: additional-scrape-configs
-    key: linkerd-prometheus-additional.yaml
-  ....
-  ....
+kubectl get prometheus prometheus-kube-prometheus-prometheus -n monitoring -o yaml | sed s/prometheus-kube-prometheus-prometheus-scrape-confg/prometheus-kube-prometheus-prometheus-scrape-confg-linkerd/ | kubectl apply -f -
+
 ```
 
 Linkerd integration with Jaeger
