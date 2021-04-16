@@ -1,0 +1,4 @@
+spec:
+  additionalScrapeConfigs:
+    key: additional-scrape-configs.yaml
+    name: prometheus-kube-prometheus-prometheus-scrape-confg-linkerd
