@@ -15,10 +15,10 @@ namespace Contoso.Expenses.Web
 {
     public class Startup
     {
-        private readonly IWebHostEnvironment _env;
+        private readonly IHostingEnvironment _env;
         public IConfiguration Configuration { get; }
 
-        public Startup(IWebHostEnvironment env)
+        public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                             .SetBasePath(env.ContentRootPath)
@@ -58,7 +58,7 @@ namespace Contoso.Expenses.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddMvc();
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // see https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-2.2
             string connectionString = Configuration["ConnectionStrings:DBConnectionString"];
@@ -76,11 +76,11 @@ namespace Contoso.Expenses.Web
                 };
             });
 
-            services.AddSingleton<IWebHostEnvironment>(_env);
+            services.AddSingleton<IHostingEnvironment>(_env);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ContosoExpensesWebContext context, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ContosoExpensesWebContext context, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
