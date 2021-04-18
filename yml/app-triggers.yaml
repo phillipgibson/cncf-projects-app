@@ -95,7 +95,6 @@ kind: EventListener
 metadata:
   name: conexp-listener
 spec:
-  serviceAccountName: tekton-triggers-admin
   triggers:
     - name: github-listener
       interceptors:
@@ -118,6 +117,20 @@ spec:
         - ref: conexp-pipelinebinding
       template:
         name: conexp-triggertemplate
+  resources:
+    kubernetesResource:
+      spec:
+        template:
+          spec:
+            serviceAccountName: tekton-triggers-admin
+            containers:
+              - resources:
+                  requests:
+                    memory: "64Mi"
+                    cpu: "250m"
+                  limits:
+                    memory: "128Mi"
+                    cpu: "500m"            
 ---
 apiVersion: v1
 kind: Secret
