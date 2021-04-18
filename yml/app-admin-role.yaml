@@ -58,7 +58,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: tekton-triggers-admin
-  namespace: default
+  namespace: conexp-mvp-devops
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
