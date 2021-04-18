@@ -363,7 +363,8 @@ kubectl apply -f yml/tekton-feature-flags-configmap.yaml -n  tekton-pipelines
 ```
 Install Tekton Triggers
 ```
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/previous/v0.12.0/release.yaml
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/previous/v0.13.0/release.yaml
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/previous/v0.13.0/interceptors.yaml
 ```
 Install Tekton Dashboard
 ```
@@ -413,11 +414,13 @@ kubectl create secret docker-registry regcred --docker-server="https://$registry
 ```
 kubectl create ns conexp-mvp-devops
 
-kubectl apply -f yml/app-webhook-role.yaml -n conexp-mvp-devops
+Delete -kubectl apply -f yml/app-webhook-role.yaml -n conexp-mvp-devops
 kubectl apply -f yml/app-admin-role.yaml -n conexp-mvp-devops
 
-kubectl apply -f yml/app-create-ingress.yaml -n conexp-mvp-devops
-kubectl apply -f yml/app-create-webhook.yaml -n conexp-mvp-devops
+Delete - kubectl apply -f yml/app-create-ingress.yaml -n conexp-mvp-devops
+Delete - kubectl apply -f yml/app-create-webhook.yaml -n conexp-mvp-devops
+
+Delete - kubectl apply -f yml/app-github-secret.yaml -n conexp-mvp-devops
 ```
 
 Update Secret (basic-user-pass) for registry credentails, TriggerBinding for registry name,namespaces in triggers.yaml
@@ -453,6 +456,16 @@ kubectl apply -f yml/app-github-secret.yaml -n conexp-mvp-devops
 set org/user/repo of the source code repo variables below
 ```
 cicdWebhookHost=$topLevelDomain
+
+sed -i "s/{cicdWebhook}/$cicdWebhookHost/g" yml/tekton-el-ingress.yaml
+
+kubectl apply -f yml/tekton-el-ingress.yaml -n conexp-mvp-devops
+
+# Payload URL to be used for creating the webhook
+echo https://$cicdWebhookHost/cd
+
+Create a webhook in the git repo of the source code by navigating to {Repo} -> Setting -> Webhook -> Add Webhook
+Enter the Payload URL from above and leavet he rest as defaults
 
 gitHubOrg=<<set the name of the github org>>
 gitHubUser=<<set the name of the github user>>
