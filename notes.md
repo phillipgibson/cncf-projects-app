@@ -337,10 +337,7 @@ kubectl get prometheus prometheus-kube-prometheus-prometheus -n monitoring -o ya
 
 Linkerd integration with Jaeger
 ```
-
 linkerd jaeger install --set collector.jaegerAddr='http://jaeger-collector.tracing:14268/api/traces' | kubectl apply -f -
-
-kubectl  apply -f yml/linkerd-opencesus-collector.yaml -n tracing
 
 kubectl annotate namespace openfaas-fn config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
 kubectl annotate namespace openfaas config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
