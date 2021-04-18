@@ -374,25 +374,7 @@ Browse to http://localhost:8080
 
 ## App Installation
 
-Build and push the containers
-```
-docker login $registryHost
-conexp
-FTA@CNCF0n@zure3
-
-#Build and push API service
-docker build -t $registryHost/conexp/api:latest src/Contoso.Expenses.API
-docker push $registryHost/conexp/api:latest
-
-#Build and push web app
-docker build -t $registryHost/conexp/web:latest  -f src/Contoso.Expenses.Web/Dockerfile ./src
-docker push $registryHost/conexp/web:latest
-
-#Build and push email dispatcher
-docker build -t $registryHost/conexp/emaildispatcher:latest  -f src/Contoso.Expenses.OpenFaaS/Dockerfile ./src
-docker push $registryHost/conexp/emaildispatcher:latest
-```
-
+Create a namespace for app deployment and annotate it for linkerd and jaeger operations
 ```
 kubectl create ns conexp-mvp
 kubectl annotate namespace conexp-mvp linkerd.io/inject=enabled
@@ -400,7 +382,7 @@ kubectl annotate namespace conexp-mvp config.linkerd.io/skip-outbound-ports="422
 kubectl annotate namespace conexp-mvp config.linkerd.io/trace-collector=collector.linkerd-jaeger:55678
 ```
 
-Create the registry credentials in teh deployment namespaces
+Create the registry credentials in the deployment namespaces
 ```
 kubectl create secret docker-registry regcred --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n conexp-mvp
 kubectl create secret docker-registry regcred --docker-server="https://$registryHost" --docker-username=conexp  --docker-password=FTA@CNCF0n@zure3  --docker-email=user@mycompany.com -n openfaas-fn
@@ -412,7 +394,6 @@ kubectl create secret docker-registry regcred --docker-server="https://$registry
 kubectl create ns conexp-mvp-devops
 
 kubectl apply -f yml/app-admin-role.yaml -n conexp-mvp-devops
-
 ```
 
 Update Secret (basic-user-pass) for registry credentails, TriggerBinding for registry name,namespaces in triggers.yaml
@@ -449,6 +430,8 @@ echo https://$cicdWebhookHost/cd
 
 Create a webhook in the git repo of the source code by navigating to {Repo} -> Setting -> Webhook -> Add Webhook
 Enter the Payload URL from above, select the Content type as application/json and leavet he rest as defaults
+
+Make a change to the readme.md file and observe the deployment in tekton dashboard
 
 ```
 ## Launch the Application
