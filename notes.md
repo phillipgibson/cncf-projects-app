@@ -414,13 +414,8 @@ kubectl create secret docker-registry regcred --docker-server="https://$registry
 ```
 kubectl create ns conexp-mvp-devops
 
-Delete -kubectl apply -f yml/app-webhook-role.yaml -n conexp-mvp-devops
 kubectl apply -f yml/app-admin-role.yaml -n conexp-mvp-devops
 
-Delete - kubectl apply -f yml/app-create-ingress.yaml -n conexp-mvp-devops
-Delete - kubectl apply -f yml/app-create-webhook.yaml -n conexp-mvp-devops
-
-Delete - kubectl apply -f yml/app-github-secret.yaml -n conexp-mvp-devops
 ```
 
 Update Secret (basic-user-pass) for registry credentails, TriggerBinding for registry name,namespaces in triggers.yaml
@@ -444,16 +439,7 @@ kubectl apply -f yml/app-deploy-rolebinding.yaml -n conexp-mvp
 kubectl apply -f yml/app-deploy-rolebinding.yaml -n openfaas-fn
 ```
 
-Generate PAT token(Settings->Developer settings->Personal access tokens) for the repo -> public_repo, admin:repo_hook, set the pat token below
-```
-patToken=<<set the pat tokne>>
-
-sed -i "s/{patToken}/$patToken/g" yml/app-github-secret.yaml
-
-kubectl apply -f yml/app-github-secret.yaml -n conexp-mvp-devops
-```
-
-set org/user/repo of the source code repo variables below
+Expose the Tekton Event Listener externally through an Ingress for Github to dispatch the push events
 ```
 cicdWebhookHost=$topLevelDomain
 
@@ -465,25 +451,10 @@ kubectl apply -f yml/tekton-el-ingress.yaml -n conexp-mvp-devops
 echo https://$cicdWebhookHost/cd
 
 Create a webhook in the git repo of the source code by navigating to {Repo} -> Setting -> Webhook -> Add Webhook
-Enter the Payload URL from above and leavet he rest as defaults
+Enter the Payload URL from above, select the Content type as application/json and leavet he rest as defaults
 
-gitHubOrg=<<set the name of the github org>>
-gitHubUser=<<set the name of the github user>>
-gitHubRepo=<<set the name of the github repo>>
-
-sed -i "s/{cicdWebhook}/$cicdWebhookHost/g" yml/app-ingress-run.yaml
-
-kubectl apply -f yml/app-ingress-run.yaml  -n conexp-mvp-devops
-
-sed -i "s/{cicdWebhook}/$cicdWebhookHost/g" yml/app-webhook-run.yaml
-sed -i "s/{mygithub-org-replace}/$gitHubOrg/g" yml/app-webhook-run.yaml
-sed -i "s/{mygithub-user-replace}/$gitHubUser/g" yml/app-webhook-run.yaml
-sed -i "s/{mygithub-repo-replace}/$gitHubRepo/g" yml/app-webhook-run.yaml
-
-kubectl apply -f yml/app-webhook-run.yaml -n conexp-mvp-devops
 ```
 ## Launch the Application
 Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example uniquename.centralus.cloudapp.azure.com.
 This will launch the application and you can proceed to create, update, delete expenses.
 
-#6
