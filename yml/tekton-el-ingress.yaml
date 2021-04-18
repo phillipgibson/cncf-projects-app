@@ -8,10 +8,15 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     cert-manager.io/cluster-issuer: letsencrypt    
 spec:
+  tls:
+  - secretName: webhook-tls
+    hosts:
+    - {cicdWebhook}
   rules:
-    - http:
-        paths:
-          - path: /
-            backend:
-              serviceName: EVENT_LISTENER_SERVICE_NAME # REPLACE WITH YOUR SERVICE NAME FROM STEP 2
-              servicePort: 8080
+  - host: {cicdWebhook}
+    http:
+      paths:
+      - path: /cd
+        backend:
+          serviceName: el-conexp-listener
+          servicePort: 8080
