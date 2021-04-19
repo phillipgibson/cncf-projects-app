@@ -400,6 +400,7 @@ kubectl create secret docker-registry regcred --docker-server="https://$registry
 
 ```
 kubectl create ns conexp-mvp-devops
+kubectl apply -f yml/tekton-limit-range.yaml
 
 kubectl apply -f yml/app-admin-role.yaml -n conexp-mvp-devops
 ```
