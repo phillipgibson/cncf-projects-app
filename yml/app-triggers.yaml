@@ -34,6 +34,14 @@ spec:
         podTemplate:
           nodeSelector:
             kubernetes.io/os: linux
+          containers:
+            - resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "0.5"
+                limits:
+                  memory: "256Mi"
+                  cpu: "1"            
         params:
           - name: deployment-namespace
             value: $(tt.params.deployment-namespace)
