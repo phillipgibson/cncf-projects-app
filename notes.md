@@ -235,6 +235,12 @@ GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
 
 USE conexpweb;
 GRANT ALL PRIVILEGES ON *.* TO 'ftacncf'@'%';
+
+# Exit from mysql cli
+exit;
+
+# Exit from the pod
+exit;
 ```
 
 ## OpenFaaS
@@ -316,7 +322,7 @@ step certificate create identity.linkerd.cluster.local issuer.crt issuer.key --c
 linkerd install --identity-trust-anchors-file ca.crt --identity-issuer-certificate-file issuer.crt --identity-issuer-key-file issuer.key | kubectl apply -f -
 
 # Install linkerd dashboard
-linkerd viz install --set prometheus.enabled=false --set grafana.enabled=false --set prometheusUrl=prometheus-kube-prometheus-prometheus.monitoring:9090 --set grafanaUrl=prometheus-grafana:80 --set jaegerUrl=jaeger-collector.tracing:14268 | kubectl apply -f -
+linkerd viz install --set prometheus.enabled=false --set grafana.enabled=false --set prometheusUrl=prometheus-kube-prometheus-prometheus.monitoring:9090 --set grafanaUrl=prometheus-grafana.monitoring:80 --set jaegerUrl=jaeger-collector.tracing:14268 | kubectl apply -f -
 ```
 
 Integrate Openfaas with Linkerd (need to wait for Linker do to come up)
