@@ -353,7 +353,7 @@ kubectl annotate namespace ingress-basic config.linkerd.io/trace-collector=colle
 ```
 
 ```
-kubectl port-forward svc/linkerd-web 8080:8084 -n linkerd
+kubectl port-forward svc/web  8080:8084 -n linkerd-viz
 Browse to http://localhost:8080
 ```
 
