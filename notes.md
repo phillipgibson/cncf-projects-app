@@ -7,6 +7,8 @@ Refer the [yml](yml) folder for the yamls
 
 Create a Kubernetes Cluster
 
+Fork this repository (needed to enable CD) and clone it
+
 Install Nginx Ingress controller https://docs.microsoft.com/en-us/azure/aks/ingress-basic#create-an-ingress-controller
 Following commands from the first section of the referenced Docs Link is needed. 
 
