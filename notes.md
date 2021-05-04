@@ -277,8 +277,8 @@ helm install prometheus prometheus-community/kube-prometheus-stack -f yml/promet
   --version 13.13.0
 ```
 ```
-kubectl port-forward deploy/prometheus-grafana 8080:3000 -n monitoring
-Browse to http://localhost:8080 and use the username/password as admin/FTA@CNCF0n@zure3
+kubectl port-forward deploy/prometheus-grafana 8070:3000 -n monitoring
+Browse to http://localhost:8070 and use the username/password as admin/FTA@CNCF0n@zure3
 
 kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring 
 Browse to http://localhost:9090
@@ -297,8 +297,8 @@ helm install jaeger jaegertracing/jaeger -f yml/jaeger-values.yaml \
 ```
 ```
 # Wait for at least ~5 minutes before browsing to the Jaeger UI
-kubectl port-forward svc/jaeger-query 8080:80 -n tracing
-Browse to http://localhost:8080
+kubectl port-forward svc/jaeger-query 8060:80 -n tracing
+Browse to http://localhost:8060
 ```
 
 ## Linkerd
@@ -445,5 +445,5 @@ Make a change to the readme.md file and observe the deployment in tekton dashboa
 
 ```
 ## Launch the Application
-Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example uniquename.centralus.cloudapp.azure.com.
+Navigate to the FQDN of the NGINX ingress controller set up in the first step, also refered to as the *topLevelDomain* in the first step. For example **uniquename.centralus.cloudapp.azure.com**.
 This will launch the application and you can proceed to create, update, delete expenses.
