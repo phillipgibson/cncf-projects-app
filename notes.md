@@ -406,7 +406,8 @@ kubectl apply -f yml/app-admin-role.yaml -n conexp-mvp-devops
 ```
 
 Update Secret (basic-user-pass) for registry credentails, TriggerBinding for registry name,namespaces in triggers.yaml
-Create a SendGrid Account and set an API key for use
+Create a SendGrid Account and set an API key for use. Reference this [Link](https://sendgrid.com/) to Create a Free Send Grid Account
+and thus a SendGrid Key
 ```
 sendGridApiKey=<<set the api key>>
 appHostName=$topLevelDomain
