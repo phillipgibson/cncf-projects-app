@@ -56,22 +56,14 @@ metadata:
   name: frontend-ingress-rules
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-    cert-manager.io/cluster-issuer: letsencrypt   
-    external-dns.alpha.kubernetes.io/hostname: conexp.aks.srinipadala.xyz
-    external-dns.alpha.kubernetes.io/target: aks.srinipadala.xyz
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local;
       proxy_hide_header l5d-remote-ip;
       proxy_hide_header l5d-server-id;
 spec:
-  tls:
-  - hosts:
-    - conexp.aks.srinipadala.xyz
-    secretName: tls-conexp-frontend-secret
   rules:
-  - host: conexp.aks.srinipadala.xyz
+  - host: __APPHOSTNAME__
     http:
       paths:
       - backend:
